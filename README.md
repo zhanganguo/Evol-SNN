@@ -7,9 +7,11 @@ This depository is used as the experiment code for the paper "Zheng Xu, Yuzhen N
 All the main entries are put at the root directionary.
 
 1. Train
+
 *train_cnn.m* and *train_fnn.m* are for training the analog ANNs (CNN and FNN), respectively.
 
 2. Test
+
 *main_scnn.m* and *main_sfnn.m* are for converting and test the spiking networks (SCNN and SFNN), respectively.
 
 
