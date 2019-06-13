@@ -4,8 +4,7 @@ nn.performance = [];
 num_examples = size(test_x,1);
 
 beta = evol_opts.beta;
-eta = evol_opts.eta;
-initial_Ec = evol_opts.initial_Ec;
+initial_E = evol_opts.initial_E;
 learning_rate = evol_opts.learning_rate;
 
 % Initialize network architecture
@@ -16,7 +15,7 @@ for l = 1 : numel(nn.size)
     nn.layers{l}.refrac_end = blank_neurons;
     nn.layers{l}.sum_spikes = blank_neurons;
 
-    nn.layers{l}.Ec = one_neurons * initial_Ec;
+    nn.layers{l}.E = one_neurons * initial_E;
 end
 
 % Precache answers
@@ -36,7 +35,7 @@ for t=dt:dt:lifsim_opts.duration
         % Get input impulse from incoming spikes
         I = nn.layers{l-1}.spikes*nn.W{l-1}';
 
-        C = 1./nn.layers{l}.Ec;
+        C = 1./nn.layers{l}.E;
         dv = I./ C;
         
         % Add input to membrane p otential
@@ -44,19 +43,15 @@ for t=dt:dt:lifsim_opts.duration
         % Check for spiking
         nn.layers{l}.spikes = nn.layers{l}.mem >= lifsim_opts.threshold;
         % Reset
-        nn.layers{l}.mem(nn.layers{l}.spikes) = 0;
+        nn.layers{l}.mem(nn.layers{l}.spikes) = lifsim_opts.rest;
         % Ban updates until....
         nn.layers{l}.refrac_end(nn.layers{l}.spikes) = t + lifsim_opts.t_ref;
         % Store result for analysis later
         nn.layers{l}.sum_spikes = nn.layers{l}.sum_spikes + nn.layers{l}.spikes;
         
-        [size1,~] = size(nn.layers{l}.spikes);
-        [~, size2] = size(nn.W{l-1});
-        A = ones(size1,size2);
-        y = nn.layers{l}.spikes .* (A * nn.W{l-1}') * eta;
-%         delta_Ec = (1./nn.layers{l}.Ec + (1-beta)*I./y).*learning_rate;
-        delta_Ec = (1./nn.layers{l}.Ec + (- y.*I + beta.*(1-y).*I)).*learning_rate; % 该系数（20）为最优值
-        nn.layers{l}.Ec = nn.layers{l}.Ec + delta_Ec;
+        y = nn.layers{l}.spikes ;
+        delta_E = (1./nn.layers{l}.E + (y.*I + beta.*(1-y).*I)) / (lifsim_opts.threshold - lifsim_opts.rest).*learning_rate;
+        nn.layers{l}.E = nn.layers{l}.E + delta_E;
     end
     
     if(mod(round(t/dt),round(lifsim_opts.report_every/dt)) == round(lifsim_opts.report_every/dt)-1)

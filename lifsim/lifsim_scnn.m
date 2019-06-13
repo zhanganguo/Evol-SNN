@@ -46,7 +46,7 @@ for t = 0:opts.dt:opts.duration
                 % Only allow non-refractory neurons to get input
                 z(cnn.layers{l}.refrac_end{j} > t) = 0;
                 % Add input
-                cnn.layers{l}.mem{j} = cnn.layers{l}.mem{j} + z;
+                cnn.layers{l}.mem{j} = cnn.layers{l}.mem{j} + z - cnn.layers{l}.mem{j}*opts.dt;
                 % Check for spiking
                 cnn.layers{l}.spikes{j} = cnn.layers{l}.mem{j} >= opts.threshold;
                 % Reset
@@ -68,7 +68,7 @@ for t = 0:opts.dt:opts.duration
                 % Only allow non-refractory neurons to get input
                 z(cnn.layers{l}.refrac_end{j} > t) = 0;
                 % Add input
-                cnn.layers{l}.mem{j} = cnn.layers{l}.mem{j} + z;
+                cnn.layers{l}.mem{j} = cnn.layers{l}.mem{j} + z - cnn.layers{l}.mem{j}*opts.dt;
                 % Check for spiking
                 cnn.layers{l}.spikes{j} = cnn.layers{l}.mem{j} >= opts.threshold;
                 % Reset

@@ -40,7 +40,7 @@ for t=dt:dt:lifsim_opts.duration
 %         TAU = 250/sqrt(lifsim_opts.max_rate);
         K0 = 2;
         k = exp(-K0*(t/dt/TAU-1/2)) / (1+exp(-K0*(t/dt/TAU-1/2)));
-        C = k./nn.layers{l}.Ec;
+        C = k./nn.layers{l}.E;
         
         dv = I./ C;
         
@@ -56,12 +56,9 @@ for t=dt:dt:lifsim_opts.duration
         % Store result for analysis later
         nn.layers{l}.sum_spikes = nn.layers{l}.sum_spikes + nn.layers{l}.spikes;
         
-        [size1,~] = size(nn.layers{l}.spikes);
-        [~, size2] = size(nn.W{l-1});
-        A = ones(size1,size2);
-        y = nn.layers{l}.spikes .* (A * nn.W{l-1}') * eta;
-        delta_Ec = (1./nn.layers{l}.Ec - y.*I + beta.*(1-y).*I).*learning_rate;
-        nn.layers{l}.Ec = nn.layers{l}.Ec + delta_Ec;
+        y = nn.layers{l}.spikes ;        
+        delta_E = (1./nn.layers{l}.E + (y.*I + beta.*(1-y).*I)) / (lifsim_opts.threshold - lifsim_opts.rest).*learning_rate;
+        nn.layers{l}.Ec = nn.layers{l}.E + delta_E;
     end
     
     if(mod(round(t/dt),round(lifsim_opts.report_every/dt)) == round(lifsim_opts.report_every/dt)-1)

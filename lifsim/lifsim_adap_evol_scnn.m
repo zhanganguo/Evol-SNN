@@ -3,8 +3,7 @@ num_examples = size(test_x, 3);
 num_classes  = size(test_y, 1);
 
 beta = evol_opts.beta;
-eta = evol_opts.eta;
-initial_Ec = evol_opts.initial_Ec;
+initial_E = evol_opts.initial_E;
 learning_rate = evol_opts.learning_rate;
 
 % Initialize a neuron-based network - needs to be activated to get all the
@@ -19,8 +18,8 @@ for l = 1 : numel(cnn.layers)
         cnn.layers{l}.mem{j} = correctly_sized_zeros;
         cnn.layers{l}.refrac_end{j} = correctly_sized_zeros;        
         cnn.layers{l}.sum_spikes{j} = correctly_sized_zeros;
-        cnn.layers{l}.Ec{j} = ones(size(cnn.layers{l}.a{j}, 1), ...
-            size(cnn.layers{l}.a{j}, 2), num_examples) * initial_Ec;
+        cnn.layers{l}.E{j} = ones(size(cnn.layers{l}.a{j}, 1), ...
+            size(cnn.layers{l}.a{j}, 2), num_examples) * initial_E;
     end   
 end
 cnn.sum_fv = zeros(size(cnn.ffW,2), num_examples);
@@ -57,7 +56,7 @@ for t = 0:scnn_opts.dt:scnn_opts.duration
                 K0 = 1;
 %                 k = 1 / (1 + exp(-K0*(t/scnn_opts.dt/TAU-1/2)));
                 k = exp(-K0*(t/scnn_opts.dt/TAU-1/2)) / (1+exp(-K0*(t/scnn_opts.dt/TAU-1/2)));
-                C = k./cnn.layers{l}.Ec{j};
+                C = k./cnn.layers{l}.E{j};
                 dv = I./ C;
                 
                 dv(cnn.layers{l}.refrac_end{j} > t) = 0;                                                                                                                                      
@@ -68,9 +67,9 @@ for t = 0:scnn_opts.dt:scnn_opts.duration
                 cnn.layers{l}.refrac_end{j}(cnn.layers{l}.spikes{j}) = t + scnn_opts.t_ref;
                 cnn.layers{l}.sum_spikes{j} = cnn.layers{l}.sum_spikes{j} + cnn.layers{l}.spikes{j};
                 
-                y = eta * (cnn.layers{l}.refrac_end{j} == t + scnn_opts.t_ref);
-                delta_Ec = (1./cnn.layers{l}.Ec{j} - y.*I + beta.*(1-y).*I) .* learning_rate;
-                cnn.layers{l}.Ec{j} = cnn.layers{l}.Ec{j} + delta_Ec;
+                y = cnn.layers{l}.spikes{j};
+                delta_E = (1./cnn.layers{l}.E{j} + (y.*I + beta.*(1-y).*I)) / (scnn_opts.threshold - scnn_opts.rest).*learning_rate;
+                cnn.layers{l}.E{j} = cnn.layers{l}.E{j} + delta_E;
             end
             %  set number of input maps to this layers number of outputmaps
             inputmaps = cnn.layers{l}.outputmaps;
@@ -88,7 +87,7 @@ for t = 0:scnn_opts.dt:scnn_opts.duration
                 K0 = 1;
 %                 k = 1 / (1+exp(-K0*(t/scnn_opts.dt/TAU-1/2)));
                 k = exp(-K0*(t/scnn_opts.dt/TAU-1/2)) / (1+exp(-K0*(t/scnn_opts.dt/TAU-1/2)));
-                C = k./cnn.layers{l}.Ec{j};
+                C = k./cnn.layers{l}.E{j};
                 dv = I ./ C;
                 
                 dv(cnn.layers{l}.refrac_end{j} > t) = 0;
@@ -98,9 +97,9 @@ for t = 0:scnn_opts.dt:scnn_opts.duration
                 cnn.layers{l}.refrac_end{j}(cnn.layers{l}.spikes{j}) = t + scnn_opts.t_ref;              
                 cnn.layers{l}.sum_spikes{j} = cnn.layers{l}.sum_spikes{j} + cnn.layers{l}.spikes{j};    
 
-                y = eta * (cnn.layers{l}.refrac_end{j} == t + scnn_opts.t_ref);
-                delta_Ec = (1./cnn.layers{l}.Ec{j} - y.*I + beta.*(1-y).*I).* learning_rate;
-                cnn.layers{l}.Ec{j} = cnn.layers{l}.Ec{j} + delta_Ec;
+                y = cnn.layers{l}.spikes{j};
+                delta_E = (1./cnn.layers{l}.E{j} + (y.*I + beta.*(1-y).*I)) / (scnn_opts.threshold - scnn_opts.rest).*learning_rate;
+                cnn.layers{l}.E{j} = cnn.layers{l}.E{j} + delta_E;
             end
         end
     end
