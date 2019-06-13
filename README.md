@@ -1,7 +1,7 @@
 # Evol-SNN
 Evolutionary and Adaptive Evolutionary spiking neuron models for spiking CNN and FNN.
 
-This repository is used as the experiment code for the paper "Zheng Xu, Yuzhen Niu, Ying Han, Anguo Zhang*, Wei Zhu. *Evolutionary Neuron Model for Fast-Response Spiking Neural Networks*".
+This repository is used as the experiment code for the paper "Zheng Xu, Yuzhen Niu, Ying Han, Anguo Zhang*, Wei Zhu. *Self-Evolutionary Neuron Model for Fast-Response Spiking Neural Networks*".
 
 ## How to Use
 All the main entries are put at the root directionary.
