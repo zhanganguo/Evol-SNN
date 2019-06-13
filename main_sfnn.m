@@ -7,7 +7,7 @@ rng('default')
  
 %% Load dataset and model data
 % dataset = 'fashion_mnist';
-dataset = 'mnist';
+dataset = 'fashion_mnist';
 if strcmp(dataset, 'fashion_mnist') == 1
     train_images = loadMNISTImages('train-images-idx3-ubyte');
     train_labels = loadMNISTLabels('train-labels-idx1-ubyte');
@@ -36,15 +36,16 @@ else
     train_y = double(train_y);
     test_y  = double(test_y);
     
-    load nn_98.84.mat;
+    load nn_mnist_98.84.mat;
 end
 
 %% Spike-based Testing of Fully-Connected NN
 lifsim_opts = struct;
 lifsim_opts.t_ref        = 0.000;
-lifsim_opts.threshold    =   1.0;
+lifsim_opts.threshold    = 1.0;
+lifsim_opts.rest         = 0.0;
 lifsim_opts.dt           = 0.001;
-lifsim_opts.duration     = 0.100;
+lifsim_opts.duration     = 0.050;
 lifsim_opts.report_every = 0.001;
 lifsim_opts.max_rate     =   200;
 sfnn = lifsim_sfnn(nn, test_x, test_y, lifsim_opts);
@@ -52,8 +53,8 @@ sfnn = lifsim_sfnn(nn, test_x, test_y, lifsim_opts);
 %% Options of Adaptive Rule 
 evol_ops.beta = 0.6;
 evol_ops.eta =0.5;
-evol_ops.initial_Ec = 0.5;
-evol_ops.learning_rate = 0.001;
+evol_ops.initial_E = 1;
+evol_ops.learning_rate = 0.01;
 
 evol_sfnn = lifsim_evol_sfnn(nn, test_x, test_y, lifsim_opts, evol_ops);
 adap_evol_fnn = lifsim_adap_evol_sfnn(nn, test_x, test_y, lifsim_opts, evol_ops);

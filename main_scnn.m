@@ -27,20 +27,24 @@ if strcmp(dataset, 'fashion_mnist') == 1
     test_y = double(test_y');
     % Load a trained ANN model
     load cnn_fashion_mnist_91.35.mat;
-elseif strcmp(datasete, 'mnist') == 1
+elseif strcmp(dataset, 'mnist') == 1
     load mnist_uint8;
     train_x = double(reshape(train_x',28,28,60000)) / 255;
     test_x = double(reshape(test_x',28,28,10000)) / 255;
     train_y = double(train_y');
     test_y = double(test_y');
     % Load a trained ANN model
-    load cnn_99.14.mat;
+    load cnn_mnist_99.14.mat;
 end
+
+test_x = test_x(:, :, 1:2000);
+test_y = test_y(:, 1:2000);
     
 %% Spike-based Testing of a ConvNet
 lifsim_opts = struct;
 lifsim_opts.t_ref        = 0.000;
 lifsim_opts.threshold    =   1.0;
+lifsim_opts.rest         =   0.0;
 lifsim_opts.dt           = 0.001;
 lifsim_opts.duration     = 0.100;
 lifsim_opts.report_every = 0.001;
@@ -51,8 +55,7 @@ scnn = lifsim_scnn(cnn, test_x, test_y, lifsim_opts);
 
 %% Test the Evolutionary Rule 
 evol_ops.beta = 0.6;
-evol_ops.eta =0.5;
-evol_ops.initial_Ec = 1;
+evol_ops.initial_E = 1;
 evol_ops.learning_rate = 0.01;
 
 evol_scnn = lifsim_evol_scnn(cnn, test_x, test_y, lifsim_opts, evol_ops);
